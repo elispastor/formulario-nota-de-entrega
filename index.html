@@ -1,0 +1,426 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Talonario - Nota de Entrega / Recibo NGE</title>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body { 
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; 
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh; 
+            padding: 20px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        .container { 
+            background: rgba(255,255,255,0.95); 
+            backdrop-filter: blur(10px); 
+            border-radius: 20px; 
+            box-shadow: 0 20px 40px rgba(0,0,0,0.1); 
+            max-width: 700px; 
+            width: 100%; 
+            overflow: hidden;
+            animation: slideUp 0.8s ease-out;
+        }
+        @keyframes slideUp { from { transform: translateY(50px); opacity: 0; } to { transform: translateY(0); opacity: 1; } }
+        
+        .header { 
+            background: linear-gradient(135deg, #28a745, #20c997); 
+            padding: 30px; 
+            text-align: center; 
+            color: white; 
+            position: relative; 
+            overflow: hidden;
+        }
+        .header::before { content: ''; position: absolute; top: 0; left: -100%; width: 100%; height: 100%; background: linear-gradient(90deg, transparent, rgba(255,255,255,0.3), transparent); transition: 0.7s; }
+        .header:hover::before { left: 100%; }
+        
+        .logo-img {
+            max-width: 120px;
+            margin-bottom: 10px;
+            filter: drop-shadow(0 4px 6px rgba(0,0,0,0.2));
+            transition: transform 0.3s;
+        }
+        .logo-img:hover { transform: scale(1.05); }
+        
+        .nota-numero {
+            font-size: 1.2rem;
+            background: rgba(255,255,255,0.2);
+            display: inline-block;
+            padding: 5px 15px;
+            border-radius: 30px;
+            margin-top: 10px;
+            font-weight: 600;
+            letter-spacing: 1px;
+            backdrop-filter: blur(5px);
+            border: 1px solid rgba(255,255,255,0.5);
+        }
+        
+        .title { font-size: 1.4em; font-weight: 700; }
+        
+        .content { padding: 30px; }
+        
+        /* Grid de 2 columnas para el formulario */
+        .form-row {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 15px;
+            margin-bottom: 15px;
+        }
+        
+        .form-group {
+            margin-bottom: 15px;
+        }
+        .form-group.full-width {
+            grid-column: span 2;
+        }
+        .form-group label {
+            display: block;
+            margin-bottom: 5px;
+            font-weight: 600;
+            color: #333;
+            font-size: 0.9rem;
+        }
+        .form-group input, .form-group textarea, .form-group select {
+            width: 100%;
+            padding: 10px;
+            border: 2px solid #ddd;
+            border-radius: 10px;
+            font-size: 0.95rem;
+            transition: all 0.3s;
+        }
+        .form-group input:focus, .form-group textarea:focus, .form-group select:focus {
+            border-color: #28a745;
+            outline: none;
+            box-shadow: 0 0 0 3px rgba(40,167,69,0.1);
+        }
+        
+        /* Items (productos) */
+        .items-section {
+            margin: 20px 0;
+            padding: 15px;
+            background: #f8f9fa;
+            border-radius: 10px;
+        }
+        .item-row {
+            display: grid;
+            grid-template-columns: 2fr 1fr auto;
+            gap: 10px;
+            margin-bottom: 10px;
+            align-items: center;
+        }
+        .item-row input {
+            width: 100%;
+            padding: 8px;
+            border: 2px solid #ddd;
+            border-radius: 8px;
+        }
+        .btn-add-item {
+            background: #28a745;
+            color: white;
+            border: none;
+            border-radius: 50%;
+            width: 36px;
+            height: 36px;
+            font-size: 1.2rem;
+            cursor: pointer;
+            transition: all 0.3s;
+            margin-top: 5px;
+        }
+        .btn-add-item:hover {
+            transform: scale(1.1);
+            background: #218838;
+        }
+        .btn-remove-item {
+            background: #dc3545;
+            color: white;
+            border: none;
+            border-radius: 50%;
+            width: 30px;
+            height: 30px;
+            font-size: 1rem;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+        .btn-remove-item:hover {
+            background: #c82333;
+        }
+        
+        .total-box {
+            background: linear-gradient(135deg, #28a745, #20c997);
+            color: white;
+            padding: 15px;
+            border-radius: 10px;
+            text-align: center;
+            font-size: 1.8rem;
+            font-weight: 700;
+            margin: 15px 0;
+        }
+        
+        .btn-generar {
+            width: 100%;
+            padding: 15px;
+            background: linear-gradient(135deg, #28a745, #20c997);
+            color: white;
+            border: none;
+            border-radius: 10px;
+            font-size: 1.2rem;
+            font-weight: 700;
+            cursor: pointer;
+            transition: all 0.3s;
+            position: relative;
+            overflow: hidden;
+        }
+        .btn-generar::before { content: ''; position: absolute; top: 0; left: -100%; width: 100%; height: 100%; background: linear-gradient(90deg, transparent, rgba(255,255,255,0.3), transparent); transition: 0.6s; }
+        .btn-generar:hover::before { left: 100%; }
+        .btn-generar:hover { transform: translateY(-3px); box-shadow: 0 10px 25px rgba(0,0,0,0.2); }
+        
+        .print-area { display: none; }
+        @media print { .container { box-shadow: none; } .print-area { display: block !important; } }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <img src="logo.png" alt="NGE Logo" class="logo-img">
+            <div class="title">NGE · Talonario de Notas y Recibos</div>
+            <div class="nota-numero">
+                <i class="far fa-file"></i> NOTA N° <span id="numero-actual">1320</span>
+            </div>
+        </div>
+        
+        <div class="content">
+            <!-- DATOS PRINCIPALES (2 columnas) -->
+            <div class="form-row">
+                <div class="form-group">
+                    <label><i class="fas fa-user"></i> Cliente</label>
+                    <input type="text" id="cliente" placeholder="Nombre completo" value="Doña Edilsa">
+                </div>
+                <div class="form-group">
+                    <label><i class="fas fa-id-card"></i> Cédula / NIT</label>
+                    <input type="text" id="cedula" placeholder="Opcional">
+                </div>
+            </div>
+            
+            <div class="form-row">
+                <div class="form-group">
+                    <label><i class="fas fa-calendar"></i> Fecha</label>
+                    <input type="date" id="fecha">
+                </div>
+                <div class="form-group">
+                    <label><i class="fas fa-tag"></i> Tipo</label>
+                    <select id="tipo-nota">
+                        <option value="NOTA DE ENTREGA">📦 NOTA DE ENTREGA</option>
+                        <option value="RECIBO DE PAGO">💰 RECIBO DE PAGO</option>
+                    </select>
+                </div>
+            </div>
+            
+            <div class="form-row">
+                <div class="form-group">
+                    <label><i class="fas fa-phone"></i> Teléfono</label>
+                    <input type="text" id="telefono" placeholder="Opcional">
+                </div>
+                <div class="form-group">
+                    <label><i class="fas fa-map-marker-alt"></i> Dirección</label>
+                    <input type="text" id="direccion" placeholder="Opcional">
+                </div>
+            </div>
+            
+            <!-- ITEMS (productos/servicios) -->
+            <div class="items-section">
+                <h3 style="margin-bottom: 15px;"><i class="fas fa-shopping-cart"></i> Productos / Servicios</h3>
+                <div id="items-container">
+                    <div class="item-row">
+                        <input type="text" class="item-desc" placeholder="Descripción" value="Aviso completo estructura PVC">
+                        <input type="number" class="item-price" placeholder="Precio" value="348000">
+                        <button class="btn-remove-item" onclick="removeItem(this)">✖</button>
+                    </div>
+                </div>
+                <button class="btn-add-item" onclick="addItem()">+ Agregar item</button>
+            </div>
+            
+            <!-- TOTAL (se actualiza solo) -->
+            <div class="total-box" id="total-preview">
+                $348.000
+            </div>
+            
+            <!-- OBSERVACIONES -->
+            <div class="form-group full-width">
+                <label><i class="fas fa-comment"></i> Observaciones / Notas</label>
+                <textarea id="observaciones" rows="2" placeholder="Notas adicionales, condiciones, etc.">Entrega conforme - Material recibido</textarea>
+            </div>
+            
+            <!-- FIRMAS (2 columnas) -->
+            <div class="form-row">
+                <div class="form-group">
+                    <label><i class="fas fa-pen"></i> Recibí conforme</label>
+                    <input type="text" id="firma-cliente" placeholder="Nombre y firma">
+                </div>
+                <div class="form-group">
+                    <label><i class="fas fa-pen"></i> Entregué</label>
+                    <input type="text" id="firma-entrega" placeholder="Nombre y firma" value="Eli Suárez">
+                </div>
+            </div>
+            
+            <!-- BOTÓN GENERAR -->
+            <button class="btn-generar" onclick="generarNota()">
+                <i class="fas fa-print"></i> GENERAR NOTA / RECIBO
+            </button>
+        </div>
+        
+        <!-- ÁREA DE IMPRESIÓN -->
+        <div class="print-area" id="print-area"></div>
+    </div>
+
+    <script>
+        // Sistema de numeración
+        let numeroNota = localStorage.getItem('numeroNota') ? parseInt(localStorage.getItem('numeroNota')) : 1320;
+        
+        function actualizarNumeroDisplay() {
+            document.getElementById('numero-actual').innerText = numeroNota;
+        }
+        
+        function incrementarNumero() {
+            numeroNota++;
+            localStorage.setItem('numeroNota', numeroNota);
+            actualizarNumeroDisplay();
+        }
+        
+        // Fecha actual por defecto
+        document.addEventListener('DOMContentLoaded', function() {
+            const hoy = new Date().toISOString().split('T')[0];
+            document.getElementById('fecha').value = hoy;
+            actualizarNumeroDisplay();
+            calcularTotal();
+        });
+        
+        // Agregar item
+        function addItem() {
+            const container = document.getElementById('items-container');
+            const newRow = document.createElement('div');
+            newRow.className = 'item-row';
+            newRow.innerHTML = `
+                <input type="text" class="item-desc" placeholder="Descripción">
+                <input type="number" class="item-price" placeholder="Precio" value="0" onchange="calcularTotal()">
+                <button class="btn-remove-item" onclick="removeItem(this)">✖</button>
+            `;
+            container.appendChild(newRow);
+        }
+        
+        function removeItem(btn) {
+            if(document.querySelectorAll('.item-row').length > 1) {
+                btn.parentElement.remove();
+                calcularTotal();
+            } else {
+                alert('Debe haber al menos un item');
+            }
+        }
+        
+        // Calcular total
+        function calcularTotal() {
+            let total = 0;
+            document.querySelectorAll('.item-price').forEach(input => {
+                total += parseFloat(input.value) || 0;
+            });
+            document.getElementById('total-preview').innerHTML = `$${total.toLocaleString()}`;
+            return total;
+        }
+        
+        // Generar nota/recibo
+        function generarNota() {
+            const cliente = document.getElementById('cliente').value;
+            const cedula = document.getElementById('cedula').value;
+            const telefono = document.getElementById('telefono').value;
+            const direccion = document.getElementById('direccion').value;
+            const fecha = document.getElementById('fecha').value;
+            const tipo = document.getElementById('tipo-nota').value;
+            const observaciones = document.getElementById('observaciones').value;
+            const firmaCliente = document.getElementById('firma-cliente').value;
+            const firmaEntrega = document.getElementById('firma-entrega').value;
+            
+            // Recorrer items
+            let itemsHTML = '';
+            let total = 0;
+            document.querySelectorAll('.item-row').forEach(row => {
+                const desc = row.querySelector('.item-desc').value;
+                const precio = parseFloat(row.querySelector('.item-price').value) || 0;
+                if(desc) {
+                    itemsHTML += `<tr><td style="padding: 8px; border-bottom: 1px solid #ddd;">${desc}</td><td style="padding: 8px; text-align: right; border-bottom: 1px solid #ddd;">$${precio.toLocaleString()}</td></tr>`;
+                    total += precio;
+                }
+            });
+            
+            // Incrementar número
+            incrementarNumero();
+            
+            const printContent = `
+                <div style="max-width: 600px; margin: 0 auto; padding: 30px; font-family: 'Segoe UI', Arial, sans-serif; background: white; border-radius: 10px;">
+                    <div style="background: linear-gradient(135deg, #28a745, #20c997); color: white; padding: 20px; text-align: center; border-radius: 10px; margin-bottom: 30px;">
+                        <h1 style="margin: 0; font-size: 2.2em;">NGE</h1>
+                        <p style="margin: 5px 0 0 0;">Nueva Generación · ${tipo}</p>
+                    </div>
+                    
+                    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; border-bottom: 2px solid #28a745; padding-bottom: 10px;">
+                        <h2 style="color: #333; font-size: 1.5rem;">${tipo} #${numeroNota-1}</h2>
+                        <p style="color: #666;">Fecha: ${fecha.replace(/-/g, '/')}</p>
+                    </div>
+                    
+                    <div style="margin-bottom: 20px;">
+                        <p><strong>Cliente:</strong> ${cliente}</p>
+                        ${cedula ? `<p><strong>Cédula/NIT:</strong> ${cedula}</p>` : ''}
+                        ${telefono ? `<p><strong>Teléfono:</strong> ${telefono}</p>` : ''}
+                        ${direccion ? `<p><strong>Dirección:</strong> ${direccion}</p>` : ''}
+                    </div>
+                    
+                    <table style="width: 100%; border-collapse: collapse; margin: 20px 0;">
+                        <thead>
+                            <tr style="background: #f8f9fa;">
+                                <th style="padding: 10px; text-align: left;">Descripción</th>
+                                <th style="padding: 10px; text-align: right;">Valor</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            ${itemsHTML}
+                        </tbody>
+                    </table>
+                    
+                    <div style="display: flex; justify-content: space-between; align-items: center; padding: 15px; background: #e9ecef; border-radius: 10px; margin: 20px 0;">
+                        <span style="font-weight: bold; font-size: 1.1rem;">TOTAL</span>
+                        <span style="font-size: 1.5rem; color: #28a745; font-weight: 800;">$${total.toLocaleString()}</span>
+                    </div>
+                    
+                    ${observaciones ? `<p style="margin: 20px 0; color: #666;"><strong>Observaciones:</strong> ${observaciones}</p>` : ''}
+                    
+                    <div style="display: flex; justify-content: space-between; margin: 30px 0 20px 0;">
+                        <div>
+                            <p><strong>Recibí conforme</strong></p>
+                            <p style="margin-top: 30px;">_________________________</p>
+                            <p>${firmaCliente || '_________________________'}</p>
+                        </div>
+                        <div>
+                            <p><strong>Entregué</strong></p>
+                            <p style="margin-top: 30px;">_________________________</p>
+                            <p>${firmaEntrega || 'Eli Suárez'}</p>
+                        </div>
+                    </div>
+                    
+                    <div style="text-align: center; margin-top: 40px; padding-top: 20px; border-top: 2px dashed #dee2e6; color: #666; font-size: 0.85rem;">
+                        <p>✅ Documento válido como constancia de entrega y/o pago</p>
+                        <p>📱 Eli Suárez | WhatsApp: <a href="https://wa.me/573244913371" style="color: #25D366;">324 491 3371</a></p>
+                        <p style="margin-top: 10px;">¡Gracias por confiar en Nueva Generación!</p>
+                    </div>
+                </div>
+            `;
+            
+            document.getElementById('print-area').innerHTML = printContent;
+            window.print();
+            calcularTotal();
+        }
+    </script>
+</body>
+</html>
